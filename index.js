@@ -196,16 +196,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // CONTACT FORM SUBMISSION (SIMULATED)
+    // CONTACT FORM SUBMISSION (sends real email via Formspree)
     // ----------------------------------------------------
+    // PASTE YOUR FORMSPREE URL BELOW (looks like https://formspree.io/f/abcdwxyz)
+    const FORM_ENDPOINT = 'PASTE_YOUR_FORMSPREE_URL_HERE';
+
     const contactForm = document.getElementById('contact-form');
     const formStatus = document.getElementById('form-status');
 
     if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Disable submit button during "sending"
+
             const submitBtn = contactForm.querySelector('.submit-btn');
             const originalBtnHtml = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -213,25 +215,32 @@ document.addEventListener('DOMContentLoaded', () => {
             formStatus.className = 'form-status';
             formStatus.textContent = '';
 
-            // Simulate server network request delay
-            setTimeout(() => {
-                // Success message
+            try {
+                if (FORM_ENDPOINT.indexOf('formspree.io') === -1) {
+                    throw new Error('Form endpoint is not set');
+                }
+
+                const response = await fetch(FORM_ENDPOINT, {
+                    method: 'POST',
+                    body: new FormData(contactForm),
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
                 formStatus.className = 'form-status success';
-                formStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your message has been sent successfully. I will get back to you shortly.';
-                
-                // Clear fields
+                formStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your message has been sent. I will get back to you shortly.';
                 contactForm.reset();
-                
-                // Re-enable button
+                contactForm.querySelectorAll('.form-input').forEach(input => input.blur());
+            } catch (err) {
+                formStatus.className = 'form-status error';
+                formStatus.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Message could not be sent. Please email me at gophanerutuja@gmail.com.';
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnHtml;
-
-                // Move floating labels back down
-                const inputs = contactForm.querySelectorAll('.form-input');
-                inputs.forEach(input => {
-                    input.blur();
-                });
-            }, 1500);
+            }
         });
     }
 });
