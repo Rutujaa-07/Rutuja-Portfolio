@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     const typingText = document.getElementById('typing-text');
     const professions = [
-        'Cloud Computing Intern',
-        'Aspiring Computer Science Graduate',
-        'Aspiring Software Engineer'
+        'Cloud & DevOps Trainee',
+        'AWS Cloud Enthusiast',
+        'Aspiring Cloud / DevOps Engineer'
     ];
     let wordIndex = 0;
     let charIndex = 0;
@@ -176,7 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('click', () => {
             const imgSrc = card.getAttribute('data-cert-img');
             if (imgSrc) {
-                openModal(imgSrc);
+                // Open only if the certificate image exists
+                const probe = new Image();
+                probe.onload = () => openModal(imgSrc);
+                probe.onerror = () => alert('Certificate image not found: ' + imgSrc);
+                probe.src = imgSrc;
             }
         });
     });
